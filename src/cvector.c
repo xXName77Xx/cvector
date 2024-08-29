@@ -5,7 +5,7 @@ static size_t cvector_getSizeOfCVectorinBytes(struct cvector* cvec) {
     return cvec->numElements*cvec->elementSize;
 }
 
-// default functions
+// default functions (only used internally)
 static bool cvector_defaultDeepCopy(void* dest, const void* src, size_t elemSize) {
     memcpy(dest, src, elemSize);
     return true;

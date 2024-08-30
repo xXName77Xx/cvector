@@ -6,8 +6,10 @@
     gcc-o cvector.o -c cvector.c -Wall
 */
 
+
+// NOTE: no iterators because there would be more overhead using the iterator than using pointers
+
 #include <stdbool.h>
-#include <memory.h>
 #include <malloc.h>
 
 struct cvector {
@@ -20,15 +22,15 @@ struct cvector {
 };
 
 // functions that return a bool returns false on failure
-struct cvector newCVector(size_t elementSize); // initalizes CVector struct
-bool reserveCVector(struct cvector* cvec, size_t numElements); // reserves extra space if needed, O(1)+
-bool resizeCVector(struct cvector* cvec, size_t numElements); // resizes the vector if needed, O(1)+
-bool pushBackCVector(struct cvector* cvec, const void* newElement); // pushes element onto the end of the vector, O(1)+
-bool popBackCVector(struct cvector* cvec, void* poppedElement); // pops last element off of the vector, O(1)
-bool fitCVector(struct cvector* cvec); // fits the allocation to the data, O(1)+ (depends on realloc implementation when it comes to shrinking allocations)
-void freeCVector(struct cvector* cvec); // frees allocated data
+struct cvector newCVector(const size_t elementSize); // initalizes CVector struct
+bool reserveCVector(struct cvector*const cvec, const size_t numElements); // reserves extra space if needed, O(1)+
+bool resizeCVector(struct cvector*const cvec, const size_t numElements); // resizes the vector if needed, O(1)+
+bool pushBackCVector(struct cvector*const cvec, const void*const newElement); // pushes element onto the end of the vector, O(1)+
+bool popBackCVector(struct cvector*const cvec, void*const poppedElement); // pops last element off of the vector, O(1)
+bool fitCVector(struct cvector*const cvec); // fits the allocation to the data, O(1)+ (depends on realloc implementation when it comes to shrinking allocations)
+void freeCVector(struct cvector*const cvec); // frees allocated data
 
-bool deepFreeCVector(struct cvector* cvec); // does a deep free on allocated data, deepFree function can be set to free all elements
-bool deepCopyCVector(struct cvector* dest, const struct cvector* src); // deepcopies the vector, deepcopy function can be set
+bool deepFreeCVector(struct cvector*const cvec); // does a deep free on allocated data, deepFree function can be set to free all elements
+bool deepCopyCVector(struct cvector*const dest, const struct cvector*const src); // deepcopies the vector, deepcopy function can be set
 
 #endif

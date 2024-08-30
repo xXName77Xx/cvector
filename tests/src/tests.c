@@ -4,7 +4,7 @@
 #include "../../src/cvector.h"
 typedef bool (*testCase)(void); 
 
-void reverseString(char* str) {
+void reverseString(char*const str) {
     for(size_t start = 0, end=strlen(str)-1; start < end; start++, end--) {
         const char temp = str[start];
         str[start] = str[end];
@@ -13,8 +13,9 @@ void reverseString(char* str) {
 }
 
 bool testCase0() {
-    const char* str = "Hello, World! This is one heck of a long string for testing purposes. If it gets all of this correct then that would be great!";
+    const char*const str = "Hello, World! This is one heck of a long string for testing purposes. If it gets all of this correct then that would be great!";
     char reversed[1024];
+    char c = '.';
     struct cvector cvec = newCVector(sizeof(char));
     for(size_t i=0; str[i]; i++) {
         if(cvec.numElements != i) goto fail;
@@ -26,8 +27,8 @@ bool testCase0() {
     if(memcmp(cvec.data, str, strlen(str)+1)) goto fail;
     if(!fitCVector(&cvec)) goto fail;
     if(cvec.elementSize*cvec.numElements != cvec.allocatedSize) goto fail;
-    char c;
     if(!popBackCVector(&cvec, &c)) goto fail;
+    if(c!='\0') goto fail;
     for(size_t i=0; cvec.numElements > 0; i++) {
         if(!popBackCVector(&cvec, &reversed[i])) goto fail;
     }
@@ -42,7 +43,7 @@ fail:
 }
 
 bool testCase1() {
-    const char* str = "Hello, World! This is one heck of a long string for testing purposes. If it gets all of this correct then that would be great!";
+    const char*const str = "Hello, World! This is one heck of a long string for testing purposes. If it gets all of this correct then that would be great!";
     struct cvector cvec = newCVector(sizeof(char));
     struct cvector dest = newCVector(sizeof(char));
     for(size_t i=0; str[i]; i++) {

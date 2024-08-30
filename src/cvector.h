@@ -9,8 +9,14 @@
 
 // NOTE: no iterators because there would be more overhead using the iterator than using pointers
 
+// ideally this wouldn't be using stdbool, but the compiler may be able to optimize code because it only has two states
 #include <stdbool.h>
+
+// malloc implementation
 #include <malloc.h>
+#define cvec_malloc malloc
+#define cvec_free free
+#define cvec_realloc realloc
 
 struct cvector {
     void* data;

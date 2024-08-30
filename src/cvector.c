@@ -24,7 +24,7 @@ static bool cvector_defaultDeepFree(void* ptr) {
 // public functions
 struct cvector newCVector(const size_t elementSize) {
     struct cvector cvec;
-    cvec.data = (void*)malloc(0); // get valid allocation, does not check for NULL values as malloc sometimes returns those as a valid response for a zero byte allocation
+    cvec.data = (void*)cvec_malloc(0); // get valid allocation, does not check for NULL values as malloc sometimes returns those as a valid response for a zero byte allocation
     cvec.numElements = 0;
     cvec.elementSize = (elementSize<=0)?1:elementSize;
     cvec.allocatedSize = 0;
@@ -38,7 +38,7 @@ bool reserveCVector(struct cvector*const cvec, const size_t numElements) {
     const size_t desiredSize = numElements * cvec->elementSize;
     if(desiredSize <= cvec->allocatedSize) return true; // if reserving less bytes than allocated, there is no need to do anything.
     const size_t newAllocatedSize = desiredSize*2; // allocate extra memory ahead of time to achieve O(1)+ time complexity for pushback operations
-    void*const newData = (void*)realloc(cvec->data, newAllocatedSize);
+    void*const newData = (void*)cvec_realloc(cvec->data, newAllocatedSize);
     if(newData == NULL) return false; // error allocating data, reservation stays as-is
     cvec->allocatedSize = newAllocatedSize;
     cvec->data = newData;
@@ -74,7 +74,7 @@ bool fitCVector(struct cvector*const cvec) {
     else if(cvec->allocatedSize < numBytes) return false; // error, more data than the allocation has size for
     // otherwise it is valid for fitting the allocation to the data
     const size_t desiredSize = cvec->numElements * cvec->elementSize;
-    void*const newData = (void*)realloc(cvec->data, desiredSize);
+    void*const newData = (void*)cvec_realloc(cvec->data, desiredSize);
     if(newData == NULL) return false; // error fitting data, reservation stays as-is. idk if this should return true to allow the program to continue properly
     cvec->allocatedSize = desiredSize;
     cvec->data = newData;
@@ -95,13 +95,13 @@ bool deepCopyCVector(struct cvector*const dest, const struct cvector*const src) 
 }
 
 void freeCVector(struct cvector*const cvec) {
-    free(cvec->data);
+    cvec_free(cvec->data);
     cvec->data = NULL; // prevent double free
     cvec->allocatedSize = 0;
     cvec->numElements = 0;
 }
 
-bool deepFreeCVector(struct cvector* cvec) {
+bool deepFreeCVector(struct cvector*const cvec) {
     for(size_t i=0; i<cvec->numElements; i++) {
         const size_t freeIndex = cvec->elementSize*i;
         void* const dataptr = &((unsigned char*)(cvec->data))[freeIndex];

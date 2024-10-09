@@ -1,2 +1,4 @@
-cvector.o:
-	cc -c "cvector.c" -o "../bin/cvector.o"
+cppvector.o:
+	g++ -c "cppvector.cpp" -o "../bin/cppvector.o"
+clean:
+	rm -f ../bin/*.o

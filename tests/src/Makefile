@@ -1,6 +1,11 @@
-tests: tests.o cvector.o
-	cc "../bin/tests.o" "../../bin/cvector.o" -o tests
+tests: tests.o cppvector.o
+	g++ "../bin/tests.o" "../../bin/cppvector.o" -o tests
 tests.o:
-	cc -c "tests.c" -o "../bin/tests.o"
-cvector.o:
+	g++ -c "tests.cpp" -o "../bin/tests.o"
+cppvector.o:
 	cd "../../src" && make
+clean:
+	rm -f ../bin/*.o
+	rm -f tests
+	rm -f tests.exe
+	cd "../../src" && make clean

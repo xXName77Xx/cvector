@@ -31,7 +31,7 @@ template<typename type> class cppvector {
     void reserve(const size_t);
     void resize(const size_t);
     void pushBack(const type);
-    void pushBack(const class cppvector<type>);
+    void pushBack(const class cppvector<type>&);
     type popBack(void);
     void fit(void);
 

@@ -71,7 +71,7 @@ template<typename type> void cppvector<type>::pushBack(const type newElement) {
     (*this)[this->numElements-1] = newElement;
 }
 
-template<class type> void cppvector<type>::pushBack(const cppvector<type> newElements) {
+template<class type> void cppvector<type>::pushBack(const cppvector<type>& newElements) {
     size_t oldSize = this->numElements;
     size_t addSize = newElements.size();
     this->resize(oldSize + addSize);
@@ -79,10 +79,11 @@ template<class type> void cppvector<type>::pushBack(const cppvector<type> newEle
 }
 
 template<typename type> type cppvector<type>::popBack(void) {
-    if(this->numElements<=0) return type(); // can't pop elements off of empty vector
-    const size_t newSize = this->numElements - 1;
+    if(this->numElements<=0) {
+        throw std::length_error("cppvector can't pop back element with size zero!");
+    }
     const type poppedElement = std::move(this->back());
-    this->resize(newSize);
+    this->resize(this->numElements - 1);
     return poppedElement;
 }
 
@@ -160,7 +161,6 @@ template<typename type> size_t cppvector<type>::allocationSize(void) const {
 }
 
 template<typename type> cppvector<type>::~cppvector(void) {
-    std::destroy<type*>(&(*this)[0], &(*this)[this->numElements]);
     delete[] this->data;
 }
 #endif

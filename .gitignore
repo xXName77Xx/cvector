@@ -1,4 +1,5 @@
 *.o
 *.exe
+tests
 tests/bin/*.o
 bin/*.o

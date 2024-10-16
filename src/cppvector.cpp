@@ -43,7 +43,7 @@ template<typename type> void cppvector<type>::realloc(size_t newSize) {
     type* newptr = new type[newSize];
     if(this->numElements>0) std::move<const type*, type*>(&(*this)[0], &(*this)[newSize], newptr);
     delete[] this->data;
-    this->data = newptr;
+    this->data          = newptr;
     this->allocatedSize = newSize;
 }
 
@@ -54,35 +54,36 @@ template<typename type> void cppvector<type>::reserve(const size_t newSize) {
 }
 
 template<typename type> void cppvector<type>::resize(const size_t newSize) {
+    if(newSize==0) {
+        // this can free up a lot of memory when the vector is cleared, and doesn't waste time with copy operations when the input size is zero
+        this->numElements = 0;
+        this->fit();
+        return;
+    }
     this->reserve(newSize); // allocate extra memory if needed
     this->numElements = newSize;
-    if(this->numElements==0) {
-        this->fit(); // this can free up a lot of memory when the vector is cleared, and doesn't waste time with copy operations
-    }
 }
 
 template<typename type> void cppvector<type>::clear(void) {
     this->resize(0);
-    this->fit();
 }
 
 template<typename type> void cppvector<type>::pushBack(const type newElement) {
     this->resize(this->numElements + 1);
-    (*this)[this->numElements-1] = newElement;
+    (*this)[this->numElements - 1] = newElement;
 }
 
 template<class type> void cppvector<type>::pushBack(const cppvector<type>& newElements) {
     size_t oldSize = this->numElements;
-    size_t addSize = newElements.size();
-    this->resize(oldSize + addSize);
-    std::copy_n<const type*, size_t, type*>((const type*)&newElements[0], addSize, &(*this)[oldSize]);
+    this->resize(oldSize + newElements.numElements);
+    std::copy_n<const type*, size_t, type*>((const type*)&newElements[0], newElements.numElements, &(*this)[oldSize]);
 }
 
 template<typename type> type cppvector<type>::popBack(void) {
     if(this->numElements<=0) {
         throw std::length_error("cppvector can't pop back element with size zero!");
     }
-    const type poppedElement = std::move(this->back());
+    const type poppedElement = std::move((*this)[this->numElements-1]);
     this->resize(this->numElements - 1);
     return poppedElement;
 }
@@ -106,21 +107,21 @@ template<typename type> void cppvector<type>::fit(void) {
 }
 
 template<typename type> void cppvector<type>::createInitalize(void) {
-    this->data = new type[0];
-    this->numElements = 0;
+    this->data          = new type[0];
+    this->numElements   = 0;
     this->allocatedSize = 0;
 }
 
 template<typename type> void cppvector<type>::copyInitalize(const class cppvector<type>& src) {
-    this->numElements   = src.size();
+    this->numElements   = src.numElements;
     this->allocatedSize = this->numElements;
     this->data          = new type[this->allocatedSize];
     std::copy_n<const type*, size_t, type*>((const type*)&src[0], this->numElements, &(*this)[0]);
 }
 
 template<typename type> void cppvector<type>::moveInitalize(class cppvector<type>&& src) {
-    this->numElements   = src.size();
-    this->allocatedSize = src.allocationSize();
+    this->numElements   = src.numElements;
+    this->allocatedSize = src.allocatedSize;
     this->data          = &src[0];
 }
 

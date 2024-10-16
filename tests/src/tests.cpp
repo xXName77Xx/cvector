@@ -28,7 +28,7 @@ bool testCase0() {
     if(!(cvecCopy==cvec)) return false;
     if(cvec.size() != strlen(str)+1) return false;
     if(memcmp(&cvec[0], str, strlen(str)+1)) return false;
-    if(!cvec.fit()) return false;
+    cvec.fit();
     if(cvec.size() != cvec.allocationSize()) return false;
     if(cvec.popBack()!='\0') return false;
     for(size_t i=0; cvec.size() > 0; i++) {
@@ -52,8 +52,8 @@ bool testCase1() {
     if(dest.size()!=cvec.size()) return false;
     if(&dest[0]==&cvec[0]) return false;
     if(memcmp(&dest[0], &cvec[0], sizeof(char)*cvec.size())) return false;
-    if(!cvec.fit()) return false;
-    if(!dest.fit()) return false;
+    cvec.fit();
+    dest.fit();
     if(dest.size()!=cvec.size()) return false;
     if(dest.allocationSize()!=cvec.allocationSize()) return false;
     if(dest.allocationSize()!=dest.size()) return false;

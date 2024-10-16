@@ -33,7 +33,7 @@ template<typename type> class cppvector {
     void pushBack(const type);
     void pushBack(const class cppvector<type>);
     type popBack(void);
-    bool fit(void);
+    void fit(void);
 
     void clear(void);
 

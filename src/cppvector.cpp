@@ -55,10 +55,6 @@ template<typename type> void cppvector<type>::reserve(const size_t newSize) {
 
 template<typename type> void cppvector<type>::resize(const size_t newSize) {
     this->reserve(newSize); // allocate extra memory if needed
-    // destruct elements that no longer exist
-    if(newSize<this->numElements) {
-        std::destroy<type*>(&(*this)[newSize], &(*this)[this->numElements+1]);
-    }
     this->numElements = newSize;
     if(this->numElements==0) {
         this->fit(); // this can free up a lot of memory when the vector is cleared, and doesn't waste time with copy operations
@@ -104,12 +100,8 @@ template<typename type> type& cppvector<type>::front(void) {
     return (*this)[0];
 }
 
-template<typename type> bool cppvector<type>::fit(void) {
-    if(this->allocatedSize == this->numElements) return true; // allocation aready fits the data
-    if(this->allocatedSize <  this->numElements) return false; // error, more data than the allocation has size for
-    // otherwise it is valid for fitting the allocation to the data
-    this->realloc(this->numElements);
-    return true;
+template<typename type> void cppvector<type>::fit(void) {
+    if(this->allocatedSize != this->numElements) this->realloc(this->numElements);
 }
 
 template<typename type> void cppvector<type>::createInitalize(void) {

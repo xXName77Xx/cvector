@@ -3,7 +3,6 @@
 
 // NOTE: no iterators because there would be more overhead using the iterator than using pointers
 
-#include <cstddef>
 #include <utility>
 #include <stdexcept>
 

@@ -99,6 +99,13 @@ bool testCase3() {
     }
     class cppvector<char> combined = firstHalf + secondHalf;
     if(combined!=cvec) return false;
+    combined.clear();
+    if(combined.size()!=0) return false;
+    combined.fit();
+    if(combined.allocationSize()!=0) return false;
+    combined+=firstHalf;
+    combined+=secondHalf;
+    if(combined!=cvec) return false;
     return true;
 }
 

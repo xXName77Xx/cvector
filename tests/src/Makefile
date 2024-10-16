@@ -1,7 +1,7 @@
 tests: tests.o cppvector.o
-	g++ "../bin/tests.o" "../../bin/cppvector.o" -o tests
+	g++ "../bin/tests.o" "../../bin/cppvector.o" -o tests -Ofast -Wall
 tests.o:
-	g++ -c "tests.cpp" -o "../bin/tests.o"
+	g++ -c "tests.cpp" -o "../bin/tests.o" -Ofast -Wall
 cppvector.o:
 	cd "../../src" && make
 clean:

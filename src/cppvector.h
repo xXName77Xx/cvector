@@ -50,12 +50,13 @@ template<typename type> class cppvector {
     type&       operator()(size_t);
 
     private:
-    void createInitalize(void);
+    void createEmpty(void);
     void copyInitalize(const class cppvector&);
     void moveInitalize(class cppvector<type>&&);
     type* data;
     size_t numElements;
     size_t allocatedSize;
+    void transferOwnershipTo(class cppvector&);
     void realloc(size_t);
 };
 

@@ -24,25 +24,30 @@ template<typename type> class cppvector<type> operator+=(class cppvector<type>& 
 }
 
 template <typename type> const type* cppvector<type>::cbegin(void) const {
-    return &this->data[0];
+    return &(*this)[0];
 };
 
 template<typename type> const type* cppvector<type>::cend(void) const {
-    return &this->data[this->numElements];
+    return &(*this)[this->numElements];
 };
 
 template <typename type> type* cppvector<type>::begin(void) {
-    return &this->data[0];
+    return &(*this)[0];
 };
 
 template<typename type> type* cppvector<type>::end(void) {
-    return &this->data[this->numElements];
+    return &(*this)[this->numElements];
 };
 
 template<typename type> void cppvector<type>::realloc(size_t newSize) {
+    if(newSize==0) { // clear vector 
+        if(this->data!=nullptr) delete[] this->data;
+        this->createEmpty(); // reinitalize vector
+        return;
+    }
     type* newptr = new type[newSize];
-    if(this->numElements>0) std::move<const type*, type*>(&(*this)[0], &(*this)[newSize], newptr);
-    delete[] this->data;
+    if(this->numElements>0 && this->data!=nullptr) std::move<const type*, type*>(&(*this)[0], &(*this)[newSize], newptr);
+    if(this->data!=nullptr) delete[] this->data;
     this->data          = newptr;
     this->allocatedSize = newSize;
 }
@@ -55,9 +60,7 @@ template<typename type> void cppvector<type>::reserve(const size_t newSize) {
 
 template<typename type> void cppvector<type>::resize(const size_t newSize) {
     if(newSize==0) {
-        // this can free up a lot of memory when the vector is cleared, and doesn't waste time with copy operations when the input size is zero
-        this->numElements = 0;
-        this->fit();
+        this->clear();
         return;
     }
     this->reserve(newSize); // allocate extra memory if needed
@@ -65,7 +68,8 @@ template<typename type> void cppvector<type>::resize(const size_t newSize) {
 }
 
 template<typename type> void cppvector<type>::clear(void) {
-    this->resize(0);
+    if(this->data!=nullptr) delete[] this->data;
+    this->createEmpty(); // reinitalize empty vector
 }
 
 template<typename type> void cppvector<type>::pushBack(const type newElement) {
@@ -74,14 +78,17 @@ template<typename type> void cppvector<type>::pushBack(const type newElement) {
 }
 
 template<class type> void cppvector<type>::pushBack(const cppvector<type>& newElements) {
+    if(newElements.numElements==0) {
+        return;
+    }
     size_t oldSize = this->numElements;
     this->resize(oldSize + newElements.numElements);
     std::copy_n<const type*, size_t, type*>((const type*)&newElements[0], newElements.numElements, &(*this)[oldSize]);
 }
 
 template<typename type> type cppvector<type>::popBack(void) {
-    if(this->numElements<=0) {
-        throw std::length_error("cppvector can't pop back element with size zero!");
+    if(this->numElements==0) {
+        throw std::domain_error("cppvector: can't pop back element with size zero!");
     }
     const type poppedElement = std::move((*this)[this->numElements-1]);
     this->resize(this->numElements - 1);
@@ -89,44 +96,60 @@ template<typename type> type cppvector<type>::popBack(void) {
 }
 
 template<typename type> type& cppvector<type>::back(void) {
-    if(this->numElements<=0) {
-        throw std::length_error("cppvector can't access back element with size zero!");
+    if(this->numElement==0) {
+        throw std::domain_error("cppvector: can't access back element with size zero!");
     }
     return (*this)[this->numElements-1];
 }
 
 template<typename type> type& cppvector<type>::front(void) {
-    if(this->numElements<=0) {
-        throw std::length_error("cppvector can't access front element with size zero!");
+    if(this->numElements==0) {
+        throw std::domain_error("cppvector: can't access front element with size zero!");
     }
     return (*this)[0];
 }
 
 template<typename type> void cppvector<type>::fit(void) {
-    if(this->allocatedSize != this->numElements) this->realloc(this->numElements);
+    if(this->allocatedSize == this->numElements) return;
+    this->realloc(this->numElements);
 }
 
-template<typename type> void cppvector<type>::createInitalize(void) {
-    this->data          = new type[0];
+template<typename type> void cppvector<type>::createEmpty(void) {
+    this->data          = nullptr;
     this->numElements   = 0;
     this->allocatedSize = 0;
 }
 
 template<typename type> void cppvector<type>::copyInitalize(const class cppvector<type>& src) {
+    if(src.numElements==0) { // don't copy empty vector
+        this->createEmpty();
+        return;
+    }
     this->numElements   = src.numElements;
     this->allocatedSize = this->numElements;
     this->data          = new type[this->allocatedSize];
     std::copy_n<const type*, size_t, type*>((const type*)&src[0], this->numElements, &(*this)[0]);
 }
 
+template<typename type> void cppvector<type>::transferOwnershipTo(class cppvector<type>& dest) {
+    // give dest access to the data
+    dest.data            = this->data;
+    dest.numElements     = this->numElements;
+    dest.allocatedSize   = this->allocatedSize;
+    // remove data access from this object
+    this->data           = nullptr;
+    this->numElements    = 0;
+    this->allocatedSize = 0;
+}
+
 template<typename type> void cppvector<type>::moveInitalize(class cppvector<type>&& src) {
-    this->numElements   = src.numElements;
-    this->allocatedSize = src.allocatedSize;
-    this->data          = &src[0];
+    // doesn't do a deep copy, instead changes ownership of the memory
+    // the change in ownership makes it no longer possible for src to delete the allocation
+    src.transferOwnershipTo(*this);
 }
 
 template<typename type> cppvector<type>::cppvector(void) {
-    this->createInitalize();
+    this->createEmpty();
 }
 
 template<typename type> cppvector<type>::cppvector(const class cppvector<type>& src) {
@@ -134,7 +157,7 @@ template<typename type> cppvector<type>::cppvector(const class cppvector<type>& 
 }
 
 template<typename type> cppvector<type>::cppvector(class cppvector<type>&& src) {
-    this->moveInitalize(std::move(src));
+    this->moveInitalize(std::move(src)); // the std::move is required here
 }
 
 template<typename type> const type& cppvector<type>::operator[](size_t index) const {
@@ -146,10 +169,16 @@ template<typename type> type& cppvector<type>::operator[](size_t index) {
 }
 
 template<typename type> const type& cppvector<type>::operator()(size_t index) const {
+    if(index<0 || index>=this->numElements) {
+        throw std::domain_error("cppvector: index out of bounds");
+    }
     return (*this)[index];
 }
 
 template<typename type> type& cppvector<type>::operator()(size_t index) {
+    if(index<0 || index>=this->numElements) {
+        throw std::domain_error("cppvector: index out of bounds");
+    }
     return (*this)[index];
 }
 
@@ -162,6 +191,6 @@ template<typename type> size_t cppvector<type>::allocationSize(void) const {
 }
 
 template<typename type> cppvector<type>::~cppvector(void) {
-    delete[] this->data;
+    this->clear();
 }
 #endif

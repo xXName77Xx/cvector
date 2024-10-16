@@ -53,7 +53,7 @@ template<typename type> class cppvector {
     void createEmpty(void);
     void copyInitalize(const class cppvector&);
     void moveInitalize(class cppvector<type>&&);
-    type* data;
+    type* dataptr;
     size_t numElements;
     size_t allocatedSize;
     void transferOwnershipTo(class cppvector&);

@@ -41,14 +41,14 @@ template<typename type> type* cppvector<type>::end(void) {
 
 template<typename type> void cppvector<type>::realloc(size_t newSize) {
     if(newSize==0) { // clear vector 
-        if(this->data!=nullptr) delete[] this->data;
+        if(this->dataptr!=nullptr) delete[] this->dataptr;
         this->createEmpty(); // reinitalize vector
         return;
     }
     type* newptr = new type[newSize];
-    if(this->numElements>0 && this->data!=nullptr) std::move<const type*, type*>(&(*this)[0], &(*this)[newSize], newptr);
-    if(this->data!=nullptr) delete[] this->data;
-    this->data          = newptr;
+    if(this->numElements>0 && this->dataptr!=nullptr) std::move<const type*, type*>(&(*this)[0], &(*this)[newSize], newptr);
+    if(this->dataptr!=nullptr) delete[] this->dataptr;
+    this->dataptr          = newptr;
     this->allocatedSize = newSize;
 }
 
@@ -68,7 +68,7 @@ template<typename type> void cppvector<type>::resize(const size_t newSize) {
 }
 
 template<typename type> void cppvector<type>::clear(void) {
-    if(this->data!=nullptr) delete[] this->data;
+    if(this->dataptr!=nullptr) delete[] this->dataptr;
     this->createEmpty(); // reinitalize empty vector
 }
 
@@ -115,7 +115,7 @@ template<typename type> void cppvector<type>::fit(void) {
 }
 
 template<typename type> void cppvector<type>::createEmpty(void) {
-    this->data          = nullptr;
+    this->dataptr          = nullptr;
     this->numElements   = 0;
     this->allocatedSize = 0;
 }
@@ -127,17 +127,17 @@ template<typename type> void cppvector<type>::copyInitalize(const class cppvecto
     }
     this->numElements   = src.numElements;
     this->allocatedSize = this->numElements;
-    this->data          = new type[this->allocatedSize];
+    this->dataptr          = new type[this->allocatedSize];
     std::copy_n<const type*, size_t, type*>((const type*)&src[0], this->numElements, &(*this)[0]);
 }
 
 template<typename type> void cppvector<type>::transferOwnershipTo(class cppvector<type>& dest) {
-    // give dest access to the data
-    dest.data            = this->data;
+    // give dest access to the dataptr
+    dest.dataptr            = this->dataptr;
     dest.numElements     = this->numElements;
     dest.allocatedSize   = this->allocatedSize;
-    // remove data access from this object
-    this->data           = nullptr;
+    // remove dataptr access from this object
+    this->dataptr           = nullptr;
     this->numElements    = 0;
     this->allocatedSize = 0;
 }
@@ -161,11 +161,11 @@ template<typename type> cppvector<type>::cppvector(class cppvector<type>&& src) 
 }
 
 template<typename type> const type& cppvector<type>::operator[](size_t index) const {
-    return this->data[index];
+    return this->dataptr[index];
 }
 
 template<typename type> type& cppvector<type>::operator[](size_t index) {
-    return this->data[index];
+    return this->dataptr[index];
 }
 
 template<typename type> const type& cppvector<type>::operator()(size_t index) const {
